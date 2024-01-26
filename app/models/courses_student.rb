@@ -1,0 +1,3 @@
+class CoursesStudent < ApplicationRecord
+
+end

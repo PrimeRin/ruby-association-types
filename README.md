@@ -70,3 +70,42 @@ comments = post1.comments
 comment1 = Comment.first
 post1 = comment1.post
 ```
+
+## Many to Many Association
+
+### 1. Using has_and_belong_to_many
+In Ruby on Rails, the has_and_belongs_to_many association is used to model a many-to-many relationship between two models. This association is appropriate when each record in one model can be associated with multiple records in another model, and vice versa. In your example, let's consider a Student model and a Course model.
+
+```ruby
+# rails generate model Post
+class Student < ApplicationRecord
+  has_and_belongs_to_many :course
+end
+```
+
+```ruby
+# rails generate model Comment post:references
+class Course < ApplicationRecord
+  has_and_belongs_to_many :students
+end
+```
+
+#### Rails Console
+```ruby
+# creating students and courses
+student1 = Student.create()
+course1 = Course.create()
+student1.courses << course1 #course1 aded to student1 courses
+
+course2 = student1.courses.create() #course 2 created and added to student1
+
+# access
+student1 = Student.first
+courses = student1.courses
+
+course1 = Course.first
+students = course1.students
+```
+
+Both has_and_belongs_to_many (HABTM) and has_many :through are used to model many-to-many relationships in Ruby on Rails, but they differ in the level of control and flexibility they provide over the join table.
+
