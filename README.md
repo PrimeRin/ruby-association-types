@@ -1,24 +1,37 @@
-# README
+# Association in Ruby on Rails
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+## One to One Association
 
-Things you may want to cover:
+In the context of these models, the one-to-one association means that each user can have, at most, one profile, and each profile belongs to exactly one user. This relationship is expressed through the has_one association in the User model and the corresponding belongs_to association in the Profile model.
 
-* Ruby version
+```ruby
+class User < ApplicationRecord
+  has_one :profile
+end
+```
 
-* System dependencies
+```ruby
+class Profile < ApplicationRecord
+  has_one :user
+end
+```
 
-* Configuration
+#### Rails Console
+```ruby
+# creating user with profile
+user1 = User.create()
+profile1 = Profile.create(user_id: user1.id)
 
-* Database creation
+user2 = User.create()
+profile2 = user2.create_profile()
 
-* Database initialization
+profile3 = Profile.create()
+user3 = profile3.create_user()
 
-* How to run the test suite
+# access
+user1 = User.find(1)
+profile1 = user1.profile
 
-* Services (job queues, cache servers, search engines, etc.)
-
-* Deployment instructions
-
-* ...
+profile2 = Profile.find(2)
+user2 = profile2.user
+```
