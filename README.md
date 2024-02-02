@@ -153,3 +153,115 @@ books = author1.books
 ```
 Both has_and_belongs_to_many (HABTM) and has_many :through are used to model many-to-many relationships in Ruby on Rails, but they differ in the level of control and flexibility they provide over the join table.
 
+## Many to Many Association
+### Polymorphic Association
+Polymorphic association enables flexible and dynamic relationship between models that allows an instance of one model to be associated with multiple other models through a single association.
+In a polymorphic association, a model can belong to more than one other type of model, sharing the same association name. This versatile setup is particularly useful when multiple models in an application need to be associated with a common model, promoting code reusability and adaptability
+
+I will try to explain polymorphic association using a 'Comment' model which can be associated with 'Post' model and 'Event' model where a comment can belong to both Post and Event model.
+
+#### 1. Without using Polymorphic association
+Lets try to create association between Comment, Post and Event without using polymorphic association so that we can fully understand the need of polymorphic association.
+
+```ruby
+# rails generate model Event title:string
+# rails generate model Post title:string
+# rails generate model CommentForPost post:references
+# rails generate model CommentForEvent event:references
+
+# app/models/comment_for_post.rb
+class CommentForPost < ApplicationRecord
+  belongs_to :post
+end
+
+# app/models/comment_for_event.rb
+class CommentForEvent < ApplicationRecord
+  belongs_to :event
+end
+
+# app/models/post.rb
+class Post < ApplicationRecord
+  has_many :comments, class_name: 'CommentForPost', dependent: :destroy
+end
+
+# app/models/event.rb
+class Event < ApplicationRecord
+  has_many :comments, class_name: 'CommentForEvent', dependent: :destroy
+end
+```
+
+#### Rails Console
+```ruby
+# Create posts, news, events, and comments
+post = Post.create()
+event = Event.create()
+
+# Create comments associated with a post, or event
+post_comment = CommentForPost.create(post: post)
+event_comment = CommentForEvent.create(event: event)
+
+# access
+post_comments = post.comments
+event_comments = event.comments
+```
+Here we can see that we need to create separate model for post comments and event comments which is not covenant.
+
+We can also create a common comment model that is shared between the post and event. But we need to change alter the
+migrate file and convert the foreign keys in the comment to integer and should disable null constraint. So that we allow the one of the foreign key to
+be nil. 
+```ruby
+# rails generate model Event 
+# rails generate model Post 
+# rails generate model Comment post:references event:references
+
+# app/models/post.rb
+class Post < ApplicationRecord
+  has_many :comments
+end
+
+# app/models/event.rb
+class Event < ApplicationRecord
+  has_many :comments
+end
+
+# app/models/comment.rb
+class Comment < ApplicationRecord
+  belongs_to :post, optional: true # allow nil
+  belongs_to :event, optional: true # allow nil
+end
+
+# db/migrate/20240202102018_create_comments.rb 
+class CreateComments < ActiveRecord::Migration[7.0] 
+  def change
+    create_table :comments do |t|
+      t.integer :post_id # remove foreign key and null constraint 
+      t.integer :event_id # remove foreign key and null constraint 
+
+      t.timestamps
+    end
+  end
+end
+```
+
+#### Rails Console
+```ruby
+# Create posts, events, and comments
+post = Post.create()
+event = Event.create()
+
+# Create comments associated with a post, or event
+comment1 = post.comments.create()
+comment2 = event.comments.create()
+
+# access
+post_comments = post.comments
+event_comments = event.comments
+```
+
+However the issue with the above database is that when creating the comment for post the foreign key of the event will be nil and vice versa. Hence the above one is not preferable.
+
+
+
+
+#### 2. Polymorphic association
+
