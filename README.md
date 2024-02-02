@@ -1,37 +1,39 @@
 # Association in Ruby on Rails
 
-## One to One Association
+## Using Polymorphic Association
 
-In the context of these models, the one-to-one association means that each user can have, at most, one profile, and each profile belongs to exactly one user. This relationship is expressed through the has_one association in the User model and the corresponding belongs_to association in the Profile model.
-
+If a Comment can belong to all Post, and Event models, a polymorphic association is a suitable and flexible solution. Here's how you can set it up:
 ```ruby
-class User < ApplicationRecord
-  has_one :profile
+# app/models/post.rb
+class Post < ApplicationRecord
+  has_many :comments, as: :commentable
 end
-```
 
-```ruby
-class Profile < ApplicationRecord
-  has_one :user
+# app/models/event.rb
+class Event < ApplicationRecord
+  has_many :comments, as: :commentable
 end
+
+# app/models/comment.rb
+class Comment < ApplicationRecord
+  belongs_to :commentable, polymorphic: true
+end
+
 ```
 
 #### Rails Console
 ```ruby
-# creating user with profile
-user1 = User.create()
-profile1 = Profile.create(user_id: user1.id)
+# create post and event
+post = Post.create()
+event = Event.create()
 
-user2 = User.create()
-profile2 = user2.create_profile()
+# create comment
+comment1 = post.comments.create()
+comment2 = event.comments.create()
 
-profile3 = Profile.create()
-user3 = profile3.create_user()
-
-# access
-user1 = User.find(1)
-profile1 = user1.profile
-
-profile2 = Profile.find(2)
-user2 = profile2.user
+# Access
+post_comments = post.comments
+event_comments = events.comments
 ```
+
+Now, with the polymorphic association, a Comment can be associated with any model that accepts comments through the commentable association. This provides a more flexible and scalable solution compared to creating separate join models for each association.
