@@ -106,7 +106,7 @@ courses = student1.courses
 course1 = Course.first
 students = course1.students
 ```
-### 1. Using has_many: through
+### 2. Using has_many: through
 The has_many :through association is used to establish a many-to-many relationship between two models with the help of a third model, often referred to as a "join" or "through" model.
 let's create a has_many :through association between Author, Book, and Authorship. In this example, Authorship will serve as the join model connecting Author and Book.
 
